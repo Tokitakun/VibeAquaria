@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "Note": {
+      "title": "Saved Note",
+      "description": "A saved consultation or identification result from VibeAquaria AI",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "category": { "type": "string", "enum": ["snap_care", "builder", "compatibility", "info"] },
+        "title": { "type": "string" },
+        "analogi_awam": { "type": "string" },
+        "summary": { "type": "string" },
+        "date": { "type": "string" },
+        "indikator": { "type": "string" },
+        "skor_sustainability": { "type": "number" },
+        "pesan_catatan": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "category", "title", "summary", "date", "createdAt"]
+    },
+    "EcoCareNote": {
+      "title": "Eco-Care Routine Task",
+      "description": "A daily maintenance task for the user's aquarium",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "text": { "type": "string" },
+        "isCompleted": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "text", "isCompleted", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/notes/{noteId}": {
+      "schema": { "$ref": "#/entities/Note" },
+      "description": "User's saved notes collection"
+    },
+    "/ecoCareNotes/{noteId}": {
+      "schema": { "$ref": "#/entities/EcoCareNote" },
+      "description": "User's eco-care routine tasks collection"
+    }
+  }
+}
