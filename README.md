@@ -1,10 +1,3 @@
-Mantap, Nafis! Link Vercel sudah ada, strategi gambar sudah siap. Sekarang kita rapihkan lagi README-nya biar juri makin terpesona sama detailnya.
-
-Saya sudah tambahkan posisi preview.png dan beberapa informasi tambahan seperti "Unique Selling Point" dan "Performance Optimization". Ini bakal nunjukkin kalau kamu bukan sekadar "asal koding", tapi mikirin performa juga.
-
-Silakan salin kode ini untuk file README.md kamu:
-
-Markdown
 # 🐠 VibeAquaria - Smart Aquascape Management System
 
 <p align="center">
