@@ -1,40 +1,53 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, User } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, User, browserPopupRedirectResolver } from 'firebase/auth';
+import { getFirestore, initializeFirestore } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 import { useState, useEffect } from 'react';
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true
+}, firebaseConfig.firestoreDatabaseId);
+
+let isSigningIn = false;
 
 export const signInWithGoogle = async () => {
+  if (isSigningIn) return null;
+  isSigningIn = true;
+  
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
   
   try {
-    const result = await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
+    isSigningIn = false;
     return result.user;
   } catch (error: any) {
-    if (error?.code === 'auth/popup-closed-by-user') {
+    isSigningIn = false;
+    const errorMessage = error?.message || '';
+    const errorCode = error?.code || '';
+    
+    if (errorCode === 'auth/popup-closed-by-user') {
       console.log('Login popup closed by user.');
       return null;
     }
-    if (error?.code === 'auth/popup-blocked') {
+    if (errorCode === 'auth/popup-blocked') {
       alert('Browser memblokir popup login. Mohon izinkan popup untuk situs ini agar bisa login.');
       return null;
     }
-    if (error?.code === 'auth/cancelled-popup-request') {
+    if (errorCode === 'auth/cancelled-popup-request') {
       console.log('Multiple popup requests cancelled.');
       return null;
     }
-    if (error?.message?.includes('INTERNAL ASSERTION FAILED')) {
-       console.log('Known firebase iframe popup issue. Please open app in a new tab.');
-       alert('Kami mendeteksi kendala pada login. Mohon buka aplikasi ini di tab baru (open in new tab) untuk melakukan login.');
+    if (errorMessage.includes('INTERNAL ASSERTION FAILED') || errorCode === 'auth/network-request-failed') {
+       console.log('Known firebase iframe issue detected:', errorMessage);
+       alert('⚠️ Waduh Scaper, ada kendala koneksi/iframe!\n\nMohon klik tombol "Open in new tab" (ikon kotak panah di pojok kanan atas) untuk membuka aplikasi ini di tab baru agar login bisa berjalan lancar.');
        return null;
     }
+    
     console.error('Error signing in with Google', error);
-    alert(`Gagal login. Jika Anda berada di dalam iframe (AI Studio), cobalah buka di tab baru.`);
+    alert(`Gagal login. Jika Anda di dalam AI Studio, coba buka di tab baru (Ikon di pojok kanan atas).`);
     return null;
   }
 };

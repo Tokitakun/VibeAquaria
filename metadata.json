@@ -1,6 +1,6 @@
 {
-  "name": "VibeAquaria AI",
-  "description": "Asisten pakar aquascape berkelanjutan yang didukung oleh Gemini AI, memberikan saran tentang identifikasi ikan/tanaman, panduan tema aquascape, dan pengecekan kecocokan spesies.",
+  "name": "VibeAquaria",
+  "description": "Sahabat setia ekosistem akuarium Anda. Identifikasi spesies, konsultasi tema aquascape, dan cek kecocokan ikan secara cerdas dan berkelanjutan.",
   "requestFramePermissions": [
     "camera"
   ],

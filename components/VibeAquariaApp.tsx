@@ -3,7 +3,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Send, ImageIcon, Leaf, Droplets, Fish, AlertTriangle, CheckCircle2, Activity, Info, Loader2, Bookmark, MapPin, Heart, BookOpen, Map, Store, Trash2, Share2, Quote, Search, Lock, CheckSquare, Square, Code, Cpu, Cloud, Layers } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -293,54 +292,128 @@ export default function VibeAquariaApp() {
     setError(null);
     setResult(null);
 
+    // Simulate search/processing delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+
     try {
-      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error('API Key tidak ditemukan. Pastikan sudah dikonfigurasi di Environment Secrets.');
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
+      const q = inputText.toLowerCase().trim();
       
-      const parts: any[] = [];
-      if (selectedImage) {
-        const imagePart = await fileToGenerativePart(selectedImage);
-        parts.push(imagePart);
-      }
-      
-      let contextualPrompt = inputText.trim();
-      if (!contextualPrompt) {
-        contextualPrompt = 'Analisis gambar ini sesuai instruksi.';
-      }
-
-      parts.push(contextualPrompt);
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
-        contents: parts,
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          responseMimeType: 'application/json',
-          temperature: 0.2, // Low temperature for more deterministic JSON
+      if (activeTab === 'snap') {
+        if (selectedImage) {
+           setResult({
+             category: 'snap_care',
+             status: 'success',
+             data: {
+               title: "Gambar Terdeteksi",
+               analogi_awam: "Fitur identifikasi gambar pintar sedang dinonaktifkan di versi ini. Anda bisa mencari nama spesies secara manual di menu Wiki!",
+               tips_praktis: ["Gunakan menu Wiki untuk cek manual", "Pastikan parameter air stabil", "Jaga kebersihan akuarium"],
+               spek_air: { suhu: "24-28C", ph: "6.5-7.5", level: "Manual" },
+               indikator: "🔵",
+               skor_sustainability: 100,
+               pesan_catatan: "Gunakan menu Wiki untuk informasi lebih akurat."
+             },
+             summary: "Identifikasi gambar manual diperlukan."
+           });
+        } else {
+          // If text only in snap tab
+          const match = encyclopediaData.find(s => q.includes(s.title.toLowerCase()));
+          if (match) {
+            setResult({
+              category: 'snap_care',
+              status: 'success',
+              data: {
+                title: match.title,
+                analogi_awam: match.p,
+                tips_praktis: ["Berikan pakan berkualitas", "Ganti air 20% tiap minggu"],
+                spek_air: { suhu: "24-28C", ph: "6.5-7.5", level: "Easy" },
+                indikator: "🟢",
+                skor_sustainability: 95,
+                pesan_catatan: "Spesies ini butuh kestabilan air."
+              },
+              summary: `Informasi tentang ${match.title} ditemukan.`
+            });
+          } else {
+            throw new Error('Spesies tidak ditemukan di database lokal. Coba cari di menu Wiki!');
+          }
         }
-      });
-
-      const responseText = response.text || '';
-      try {
-        const jsonResponse = JSON.parse(responseText);
-        setResult(jsonResponse);
-        playBlupSound();
-      } catch (e) {
-        throw new Error('Gagal memproses respons dari AI (Format JSON tidak valid).');
+      } else if (activeTab === 'builder') {
+        setResult({
+          category: 'builder',
+          status: 'success',
+          data: {
+            title: "Rencana Aquascape",
+            analogi_awam: "Memulai aquascape itu seperti menanam taman kecil. Anda butuh pondasi (hardscape), media tanam (substrate), dan kesabaran.",
+            tips_praktis: ["Gunakan substrate nutrisi", "Pilih lampu yang sesuai", "Berikan CO2 jika diperlukan"],
+            spek_air: { suhu: "Adem (24-26C)", ph: "Netral", level: "Pemula" },
+            indikator: "🌿",
+            skor_sustainability: 90,
+            pesan_catatan: "Selalu mulai dengan riset tanaman sebelum membeli."
+          },
+          summary: "Panduan pembuatan aquascape umum."
+        });
+      } else if (activeTab === 'compatibility') {
+        // Simple heuristic for compatibility
+        const words = q.split(/\s+/);
+        const speciesInQuery = encyclopediaData.filter(s => q.includes(s.title.toLowerCase()));
+        
+        if (speciesInQuery.length >= 2) {
+          const s1 = speciesInQuery[0];
+          const s2 = speciesInQuery[1];
+          
+          if ((s1.title.includes('Molly') && s2.title.includes('Cupang')) || (s2.title.includes('Molly') && s1.title.includes('Cupang'))) {
+            setResult({
+              category: 'compatibility',
+              status: 'success',
+              data: {
+                title: "Waspada!",
+                analogi_awam: "Molly punya ekor panjang yang menggiurkan buat dicolek sama Cupang yang lagi galak.",
+                tips_praktis: ["Jangan digabung", "Pilih Neon Tetra sebagai gantinya"],
+                spek_air: { suhu: "25C", ph: "7.0", level: "Beresiko" },
+                indikator: "🔴",
+                skor_sustainability: 10,
+                pesan_catatan: "Utamakan keselamatan ikan."
+              },
+              summary: "Kombinasi ini sangat beresiko."
+            });
+          } else {
+            setResult({
+              category: 'compatibility',
+              status: 'success',
+              data: {
+                title: "Kecocokan Standar",
+                analogi_awam: "Kebanyakan ikan hias kecil bisa rukun asalkan tempatnya luas dan makanannya cukup.",
+                tips_praktis: ["Pastikan tank cukup besar", "Beri banyak tempat sembunyi"],
+                spek_air: { suhu: "24-28C", ph: "6.5-7.5", level: "Aman" },
+                indikator: "🟡",
+                skor_sustainability: 70,
+                pesan_catatan: "Awasi perilaku ikan di minggu pertama."
+              },
+              summary: "Kecocokan secara umum terpantau waspada/aman."
+            });
+          }
+        } else {
+          setResult({
+            category: 'compatibility',
+            status: 'success',
+            data: {
+              title: "Analisis Kecocokan",
+              analogi_awam: "Tuliskan dua nama ikan/udang (misal: 'Neon Tetra dan Udang Red Cherry') untuk cek kecocokannya!",
+              tips_praktis: ["Masukkan minimal 2 spesies", "Gunakan nama dari Wiki"],
+              spek_air: { suhu: "-", ph: "-", level: "-" },
+              indikator: "❓",
+              skor_sustainability: 50,
+              pesan_catatan: "Sebutkan spesies yang ingin dicek."
+            },
+            summary: "Input tidak lengkap untuk cek kecocokan."
+          });
+        }
       }
+
+      playBlupSound();
 
     } catch (err: any) {
       console.error(err);
-      // Handle Quota Exhausted (429) specifically
-      if (err.message?.includes('RESOURCE_EXHAUSTED') || err.message?.includes('429')) {
-        setError('Waduh, asisten AI VibeAquaria lagi rame banget/limit tercapai! 🙏 Tunggu sebentar ya (sekitar 1 menit) terus coba kirim lagi. Maaf banget ya Scaper!');
-      } else {
-        setError(err.message || 'Terjadi kesalahan saat memproses permintaan.');
-      }
+      setError(err.message || 'Terjadi kesalahan saat memproses permintaan.');
     } finally {
       setIsLoading(false);
     }
@@ -391,13 +464,13 @@ export default function VibeAquariaApp() {
           <div className="w-8 h-8 rounded-full bg-cyan-700 flex items-center justify-center shrink-0">
             <Droplets className="w-4 h-4 text-white" />
           </div>
-          <h1 className="text-lg font-bold tracking-tight text-cyan-800">VibeAquaria <span className="font-light opacity-60">AI</span></h1>
+          <h1 className="text-lg font-bold tracking-tight text-cyan-800">VibeAquaria</h1>
         </div>
         <div className="flex items-center gap-1.5">
           <button onClick={() => { setActiveTab('info'); clearInput(); }} className={cn("p-2 rounded-full transition-colors", activeTab === 'info' ? "bg-cyan-100 text-cyan-800" : "text-slate-500 hover:bg-sky-100")} title="Tentang Aplikasi">
             <Info className="w-4 h-4"/>
           </button>
-          <button onClick={() => { setActiveTab('catatan'); clearInput(); }} className={cn("p-2 rounded-full transition-colors", activeTab === 'catatan' ? "bg-cyan-100 text-cyan-800" : "text-slate-500 hover:bg-sky-100")} title="Catatan AI">
+          <button onClick={() => { setActiveTab('catatan'); clearInput(); }} className={cn("p-2 rounded-full transition-colors", activeTab === 'catatan' ? "bg-cyan-100 text-cyan-800" : "text-slate-500 hover:bg-sky-100")} title="Catatan Digital">
             <BookOpen className="w-4 h-4"/>
           </button>
           <div className="pl-1 scale-90">
@@ -414,7 +487,7 @@ export default function VibeAquariaApp() {
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-cyan-800 flex items-baseline gap-2">
-              VibeAquaria <span className="font-light opacity-60 text-2xl">AI</span>
+              VibeAquaria
             </h1>
             <p className="text-[10px] uppercase tracking-[0.2em] font-sans font-bold opacity-40 mt-1">Pakar Aquascape & Ekosistem</p>
           </div>
@@ -556,14 +629,14 @@ export default function VibeAquariaApp() {
                     </div>
                   )}
 
-                 <button
+                  <button
                     onClick={handleSubmit}
                     disabled={isLoading}
                     className="mt-6 w-full bg-cyan-700 hover:bg-cyan-800 text-white font-sans font-bold tracking-widest text-xs py-4 px-6 rounded-full shadow-md shadow-cyan-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-70 disabled:pointer-events-none"
-                 >
+                  >
                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    {isLoading ? 'MENGANALISIS...' : 'KIRIM KE VIBEAQUARIA AI'}
-                 </button>
+                    {isLoading ? 'MEMPROSES...' : 'KIRIM KE VIBEAQUARIA'}
+                  </button>
              </div>
           </div>
         </div>
@@ -582,7 +655,7 @@ export default function VibeAquariaApp() {
                   <Fish className="w-10 h-10 text-stone-300" />
                 </div>
                 <h3 className="text-2xl font-light italic text-cyan-800 mb-3">Kolam Masih Kosong</h3>
-                <p className="max-w-sm text-sm font-sans opacity-80 leading-relaxed">Gunakan panel di sebelah kiri untuk berinteraksi dengan asisten AI VibeAquaria.</p>
+                <p className="max-w-sm text-sm font-sans opacity-80 leading-relaxed">Gunakan panel di sebelah kiri untuk berinteraksi dengan asisten VibeAquaria.</p>
               </motion.div>
             )}
 
@@ -806,8 +879,8 @@ function HomeComponent({ setActiveTab, savedNotes }: { setActiveTab: (tab: TabTy
             <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-1">Eco-Friendly Guide</span>
           </div>
           <div className="px-4 md:px-8 flex flex-col items-center">
-            <span className="text-2xl font-bold text-cyan-800">AI</span>
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-1">Powered by Gemini</span>
+            <span className="text-2xl font-bold text-cyan-800">EXP</span>
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-1">Smart Engine</span>
           </div>
         </div>
       </section>
@@ -1480,8 +1553,8 @@ function Footer() {
             <div className="flex items-center gap-1.5 hover:text-cyan-600 transition-colors cursor-default" title="Google Cloud Run">
                <span className="font-bold text-xs uppercase tracking-widest">Cloud Run</span>
             </div>
-            <div className="flex items-center gap-1.5 hover:text-cyan-600 transition-colors cursor-default" title="Gemini AI">
-               <span className="font-bold text-xs uppercase tracking-widest">Gemini AI</span>
+            <div className="flex items-center gap-1.5 hover:text-cyan-600 transition-colors cursor-default" title="Smart Search">
+               <span className="font-bold text-xs uppercase tracking-widest">Smart Search</span>
             </div>
          </div>
 
@@ -1502,7 +1575,7 @@ function TechStackSection() {
   const stacks = [
     { name: "Next.js", desc: "(App Router)", icon: <Layers className="w-6 h-6" />, type: "Frontend" },
     { name: "Tailwind & Framer", desc: "Styling", icon: <Code className="w-6 h-6" />, type: "Styling" },
-    { name: "Gemini 1.5 Flash API", desc: "Intelligence", icon: <Cpu className="w-6 h-6" />, type: "Intelligence" },
+    { name: "Local Encyclopedia", desc: "Knowledge Base", icon: <BookOpen className="w-6 h-6" />, type: "Database" },
     { name: "Firebase & Cloud Run", desc: "(Dockerized)", icon: <Cloud className="w-6 h-6" />, type: "Backend" },
   ];
 
@@ -1731,13 +1804,8 @@ function EcoCareRoutineComponent() {
               ))}
             </AnimatePresence>
             {tasks.length === 0 && (
-               <div className="col-span-full py-16 flex flex-col items-center justify-center text-center">
-                 <div className="w-20 h-20 mb-4 bg-white/40 border border-white/60 shadow-lg rounded-full flex items-center justify-center animate-bounce backdrop-blur-md">
-                   <span className="text-4xl text-cyan-500">🐠</span>
-                 </div>
-                 <p className="text-slate-600 text-lg md:text-xl font-medium max-w-md mx-auto leading-relaxed">
-                   Belum ada rutinitas? Tambahkan catatan pertamamu untuk menjaga ekosistemmu tetap sehat!
-                 </p>
+               <div className="col-span-full py-12 text-center text-slate-500 italic">
+                 Belum ada rutinitas. Tambahkan daftar rutinitas Eco-Care pertama Anda!
                </div>
             )}
           </div>
