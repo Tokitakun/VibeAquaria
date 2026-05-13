@@ -430,7 +430,7 @@ export default function VibeAquariaApp() {
 
       <div className="fixed bottom-20 md:bottom-6 right-4 md:right-8 flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-sky-100 shadow-sm z-50">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        Server Online
+        API offline
       </div>
 
       <div className="max-w-6xl mx-auto p-4 md:p-8 flex-1 w-full">
