@@ -1,20 +1,46 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🐠 VibeAquaria - Smart Aquascape Management System
 
-# Run and deploy your AI Studio app
+VibeAquaria adalah platform manajemen akuarium pintar yang menggabungkan estetika visual dengan teknologi **Google Gemini AI**. Proyek ini dikembangkan sebagai entri untuk kompetisi **JuaraVibeCoding**.
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/1653fa97-84b7-404c-8783-dc0b3a26a852
+## 🚀 Fitur Utama
 
-## Run Locally
+### 1. 🔍 Snap & Care (AI Detection)
+Fitur berbasis AI untuk mengidentifikasi spesies ikan dan memberikan panduan perawatan (suhu & pH) secara otomatis melalui analisis gambar.
 
-**Prerequisites:**  Node.js
+### 2. 💬 Konsultasi AI
+Asisten virtual yang membantu pengguna memberikan solusi terkait ekosistem aquascape secara real-time.
 
+---
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## ⚠️ Informasi Penting (API Key & Deployment)
+
+Aplikasi ini dirancang untuk beroperasi menggunakan **Gemini API Key**. Namun, perlu diperhatikan bahwa:
+
+*   **Tanpa API Key di Repositori:** Demi keamanan data pribadi dan kepatuhan terhadap aturan teknis **JuaraVibeCoding**, repositori ini **TIDAK** menyertakan API Key secara spesifik. 
+*   **Versi Cloud Run:** Versi yang di-deploy ke Cloud Run telah dikonfigurasi tanpa kredensial API backend untuk menghindari kendala autentikasi platform saat proses penilaian.
+*   **Fungsionalitas AI:** Untuk melihat bagaimana AI bekerja secara utuh dalam sistem VibeAquaria, silakan merujuk pada **Video Demo** yang telah disediakan sebagai bagian dari submisi lomba.
+
+---
+
+## 🛠️ Tech Stack
+
+*   **Frontend:** Next.js (App Router)
+*   **AI Engine:** Google Gemini AI (Required API Key for full functionality)
+*   **Styling:** Tailwind CSS (Ocean Neon Theme)
+*   **Deployment:** Google Cloud Run
+
+---
+
+## 📂 Cara Menjalankan Lokal
+
+Jika Anda ingin mencoba fitur AI secara mandiri, Anda harus menggunakan API Key milik Anda sendiri:
+
+1. Buat file `.env.local` di root folder.
+2. Tambahkan baris: `NEXT_PUBLIC_GEMINI_API_KEY=YOUR_OWN_API_KEY`.
+3. Jalankan `npm install` dan `npm run dev`.
+
+---
+
+**Dikembangkan oleh Nafis untuk JuaraVibeCoding 2026.**
